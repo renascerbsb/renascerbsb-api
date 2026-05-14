@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.routes import eventos, membros,  kids, dashboard, cidades, filiais, ministerios, vinculos
+from app.api.routes import eventos, pessoas,  kids, dashboard, cidades, filiais, ministerios, vinculos
 
 app = FastAPI(
     title="Renascer BSB API",
@@ -8,7 +8,7 @@ app = FastAPI(
     version="0.1.0"
 )
 
-app.include_router(membros.router, prefix="/membros", tags=["Membros"])
+app.include_router(pessoas.router, prefix="/pessoas", tags=["Pessoas"])
 app.include_router(kids.router, prefix="/kids", tags=["Kids"])
 app.include_router(eventos.router, prefix="/eventos", tags=["Eventos"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])

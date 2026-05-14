@@ -1,12 +1,17 @@
-from app.schemas.ministerio import MinisterioResponse
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
+from app.models.ministerio import Ministerio
 
+def listar_ministerios(db: Session) -> list[Ministerio]:
+    try:
+        return (
+            db.query(Ministerio)
+            .filter(Ministerio.st_ativo.is_(True))
+            .order_by(Ministerio.ds_nome)
+            .all()
+        )
+    except SQLAlchemyError as e:
 
-def listar_ministerios() -> list[MinisterioResponse]:
-    return [
-        MinisterioResponse(id=1, nome="Ministério infantil"),
-        MinisterioResponse(id=2, nome="Decoração"),
-        MinisterioResponse(id=3, nome="Louvor"),
-        MinisterioResponse(id=4, nome="Comunicação"),
-        MinisterioResponse(id=5, nome="Líder de célula"),
-        MinisterioResponse(id=6, nome="Adote"),
-    ]
+        print(f"Erro: {e}")
+
+        raise

@@ -1,11 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from app.core.database import Base
+from sqlalchemy import Boolean, CHAR, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+from app.core.database import Base, DATABASE_SCHEMA
 
 
 class Cidade(Base):
-    __tablename__ = "cidade"
+    __tablename__ = "cd_cidade"
+    __table_args__ = {"schema": DATABASE_SCHEMA}
 
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String, nullable=False)
-    uf = Column(String(2), nullable=False)
-    ativo = Column(Boolean, default=True)
+    seq_cidade: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ds_nome: Mapped[str] = mapped_column(String(150), nullable=False)
+    uf: Mapped[str] = mapped_column(CHAR(2), nullable=False)
+    st_ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

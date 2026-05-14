@@ -2,6 +2,6 @@ from pydantic import BaseModel
 
 
 class MinisterioResponse(BaseModel):
-    id: int
-    nome: str
-    ativo: bool = True
+    seq_ministerio: int
+    ds_nome: str
+    st_ativo: bool = True
