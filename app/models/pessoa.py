@@ -1,7 +1,6 @@
 from datetime import date
-
 from sqlalchemy import Boolean, Date, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base, DATABASE_SCHEMA
 
 
@@ -16,20 +15,32 @@ class Pessoa(Base):
 
     seq_cidade: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("public.cd_cidade.seq_cidade"),
+        ForeignKey(f"{DATABASE_SCHEMA}.cd_cidade.seq_cidade"),
         nullable=True
     )
 
     seq_filial: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("public.cd_filial.seq_filial"),
+        ForeignKey(f"{DATABASE_SCHEMA}.cd_filial.seq_filial"),
         nullable=True
     )
 
     seq_vinculo: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("public.cd_vinculo.seq_vinculo"),
+        ForeignKey(f"{DATABASE_SCHEMA}.cd_vinculo.seq_vinculo"),
         nullable=True
     )
 
+    ministerios = relationship(
+        "Ministerio",
+        secondary=f"{DATABASE_SCHEMA}.rl_pessoa_ministerio",
+        primaryjoin=f"Pessoa.seq_pessoa == PessoaMinisterio.seq_pessoa",
+        secondaryjoin=f"Ministerio.seq_ministerio == PessoaMinisterio.seq_ministerio",
+        viewonly=True
+    )
+
     st_ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    cidade = relationship("Cidade")
+    filial = relationship("Filial")
+    vinculo = relationship("Vinculo")
