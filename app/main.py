@@ -1,11 +1,24 @@
+from app.core.logging_config import configurar_logs
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import eventos, pessoas,  kids, dashboard, cidades, filiais, ministerios, vinculos
+
+configurar_logs()
 
 app = FastAPI(
     title="Renascer BSB API",
     description="API do Sistema de Gestão Ministerial da Igreja Renascer BSB",
     version="0.1.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://renascerbsb.github.io"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(pessoas.router, prefix="/pessoas", tags=["Pessoas"])

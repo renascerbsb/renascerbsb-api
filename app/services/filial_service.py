@@ -1,7 +1,9 @@
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.filial import Filial
 
+logger = logging.getLogger(__name__)
 
 def listar_filiais(db: Session) -> list[Filial]:
     try:
@@ -12,7 +14,5 @@ def listar_filiais(db: Session) -> list[Filial]:
             .all()
         )
     except SQLAlchemyError as e:
-
-        print(f"Erro ao consultar cidades: {e}")
-
+        logger.exception("Erro ao listar filiais")
         raise

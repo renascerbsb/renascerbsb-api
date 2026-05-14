@@ -1,6 +1,9 @@
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.ministerio import Ministerio
+
+logger = logging.getLogger(__name__)
 
 def listar_ministerios(db: Session) -> list[Ministerio]:
     try:
@@ -11,7 +14,5 @@ def listar_ministerios(db: Session) -> list[Ministerio]:
             .all()
         )
     except SQLAlchemyError as e:
-
-        print(f"Erro: {e}")
-
+        logger.exception("Erro ao listar ministerios")
         raise

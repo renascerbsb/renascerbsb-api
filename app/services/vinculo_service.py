@@ -1,11 +1,14 @@
+import logging
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
 from app.models.vinculo import Vinculo
 
+logger = logging.getLogger(__name__)
 
 def listar_vinculos(db: Session) -> list[Vinculo]:
-
     try:
+        logger.info("Listando vínculos ativos")
 
         return (
             db.query(Vinculo)
@@ -14,8 +17,6 @@ def listar_vinculos(db: Session) -> list[Vinculo]:
             .all()
         )
 
-    except SQLAlchemyError as e:
-
-        print(f"Erro ao listar vínculos: {e}")
-
+    except SQLAlchemyError:
+        logger.exception("Erro ao listar vínculos")
         raise

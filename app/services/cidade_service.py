@@ -1,7 +1,10 @@
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.cidade import Cidade
 
+
+logger = logging.getLogger(__name__)
 
 def listar_cidades(db: Session):
 
@@ -15,7 +18,5 @@ def listar_cidades(db: Session):
         )
 
     except SQLAlchemyError as e:
-
-        print(f"Erro ao consultar cidades: {e}")
-
+        logger.exception("Erro ao listar cidades")
         raise

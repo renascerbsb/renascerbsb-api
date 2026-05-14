@@ -1,7 +1,9 @@
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.pessoa import Pessoa
 
+logger = logging.getLogger(__name__)
 
 def listar_pessoas(db: Session) -> list[Pessoa]:
     try:
@@ -12,7 +14,5 @@ def listar_pessoas(db: Session) -> list[Pessoa]:
             .all()
         )
     except SQLAlchemyError as e:
-
-        print(f"Erro: {e}")
-
+        logger.exception("Erro ao listar pessoas")
         raise
