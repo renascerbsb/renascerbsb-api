@@ -28,6 +28,20 @@ class PessoaUpdate(PessoaBase):
     seq_ministerios: list[int] = Field(default_factory=list)
 
 
+class PessoaFiltros(BaseModel):
+    seq_pessoa: int | None = None
+    ds_nome: str | None = None
+    nr_telefone: str | None = None
+    dt_nascimento: date | None = None
+    seq_cidade: int | None = None
+    seq_filial: int | None = None
+    seq_vinculo: int | None = None
+    seq_faixa_etaria: int | None = None
+    seq_lider: int | None = None
+    st_ativo: bool | None = True
+    seq_ministerios: list[int] = Field(default_factory=list)
+
+
 class PessoaLiderResponse(BaseModel):
     seq_pessoa: int
     ds_nome: str

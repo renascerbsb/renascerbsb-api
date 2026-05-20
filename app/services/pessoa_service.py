@@ -7,7 +7,12 @@ from app.models.faixa_etaria import FaixaEtaria
 from app.models.pessoa import Pessoa
 from app.models.pessoa_ministerio import PessoaMinisterio
 from app.models.pessoa_origem import PessoaOrigem
-from app.schemas.pessoa import PessoaCreate, PessoaUpdate, PessoaVisitanteCreate
+from app.schemas.pessoa import (
+    PessoaCreate,
+    PessoaFiltros,
+    PessoaUpdate,
+    PessoaVisitanteCreate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +80,12 @@ def atualizar_ministerios_pessoa(
 
 def listar_pessoas(
     db: Session,
-    seq_ministerios: list[int] | None = None
+    filtros: PessoaFiltros | None = None
 ) -> list[Pessoa]:
     try:
+        if filtros is None:
+            filtros = PessoaFiltros()
+
         query = (
             db.query(Pessoa)
             .options(
@@ -88,16 +96,45 @@ def listar_pessoas(
                 joinedload(Pessoa.lider),
                 joinedload(Pessoa.ministerios),
             )
-            .filter(Pessoa.st_ativo.is_(True))
         )
 
-        if seq_ministerios:
+        if filtros.seq_pessoa is not None:
+            query = query.filter(Pessoa.seq_pessoa == filtros.seq_pessoa)
+
+        if filtros.ds_nome:
+            query = query.filter(Pessoa.ds_nome.ilike(f"%{filtros.ds_nome}%"))
+
+        if filtros.nr_telefone:
+            query = query.filter(Pessoa.nr_telefone.ilike(f"%{filtros.nr_telefone}%"))
+
+        if filtros.dt_nascimento is not None:
+            query = query.filter(Pessoa.dt_nascimento == filtros.dt_nascimento)
+
+        if filtros.seq_cidade is not None:
+            query = query.filter(Pessoa.seq_cidade == filtros.seq_cidade)
+
+        if filtros.seq_filial is not None:
+            query = query.filter(Pessoa.seq_filial == filtros.seq_filial)
+
+        if filtros.seq_vinculo is not None:
+            query = query.filter(Pessoa.seq_vinculo == filtros.seq_vinculo)
+
+        if filtros.seq_faixa_etaria is not None:
+            query = query.filter(Pessoa.seq_faixa_etaria == filtros.seq_faixa_etaria)
+
+        if filtros.seq_lider is not None:
+            query = query.filter(Pessoa.seq_lider == filtros.seq_lider)
+
+        if filtros.st_ativo is not None:
+            query = query.filter(Pessoa.st_ativo.is_(filtros.st_ativo))
+
+        if filtros.seq_ministerios:
             query = (
                 query
                 .join(PessoaMinisterio)
                 .filter(
                     PessoaMinisterio.seq_ministerio.in_(
-                        normalizar_seq_ministerios(seq_ministerios)
+                        normalizar_seq_ministerios(filtros.seq_ministerios)
                     )
                 )
                 .distinct()
