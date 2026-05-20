@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 import app.services.pessoa_service as pessoa_service
@@ -7,8 +7,11 @@ from app.schemas.pessoa import (PessoaCreate, PessoaResponse, PessoaUpdate, Pess
 router = APIRouter()
 
 @router.get("/", response_model=list[PessoaResponse])
-def buscar_pessoas(db: Session = Depends(get_db)):
-    return pessoa_service.listar_pessoas(db)
+def buscar_pessoas(
+    seq_ministerios: list[int] | None = Query(default=None),
+    db: Session = Depends(get_db)
+):
+    return pessoa_service.listar_pessoas(db, seq_ministerios)
 
 @router.get("/{seq_pessoa}", response_model=PessoaResponse)
 def buscar_pessoa(seq_pessoa: int, db: Session = Depends(get_db)):

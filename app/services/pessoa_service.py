@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 from app.models.faixa_etaria import FaixaEtaria
 from app.models.pessoa import Pessoa
+from app.models.pessoa_ministerio import PessoaMinisterio
 from app.models.pessoa_origem import PessoaOrigem
 from app.schemas.pessoa import PessoaCreate, PessoaUpdate, PessoaVisitanteCreate
 
@@ -50,9 +51,34 @@ def buscar_seq_faixa_etaria_por_nascimento(
     return faixa_etaria.seq_faixa_etaria
 
 
-def listar_pessoas(db: Session) -> list[Pessoa]:
+def normalizar_seq_ministerios(seq_ministerios: list[int]) -> list[int]:
+    return list(dict.fromkeys(seq_ministerios))
+
+
+def atualizar_ministerios_pessoa(
+    db: Session,
+    seq_pessoa: int,
+    seq_ministerios: list[int]
+) -> None:
+    db.query(PessoaMinisterio).filter(
+        PessoaMinisterio.seq_pessoa == seq_pessoa
+    ).delete(synchronize_session=False)
+
+    for seq_ministerio in normalizar_seq_ministerios(seq_ministerios):
+        db.add(
+            PessoaMinisterio(
+                seq_pessoa=seq_pessoa,
+                seq_ministerio=seq_ministerio
+            )
+        )
+
+
+def listar_pessoas(
+    db: Session,
+    seq_ministerios: list[int] | None = None
+) -> list[Pessoa]:
     try:
-        return (
+        query = (
             db.query(Pessoa)
             .options(
                 joinedload(Pessoa.cidade),
@@ -63,9 +89,21 @@ def listar_pessoas(db: Session) -> list[Pessoa]:
                 joinedload(Pessoa.ministerios),
             )
             .filter(Pessoa.st_ativo.is_(True))
-            .order_by(Pessoa.ds_nome)
-            .all()
         )
+
+        if seq_ministerios:
+            query = (
+                query
+                .join(PessoaMinisterio)
+                .filter(
+                    PessoaMinisterio.seq_ministerio.in_(
+                        normalizar_seq_ministerios(seq_ministerios)
+                    )
+                )
+                .distinct()
+            )
+
+        return query.order_by(Pessoa.ds_nome).all()
     except SQLAlchemyError:
         logger.exception("Erro ao listar pessoas")
         raise
@@ -114,6 +152,12 @@ def criar_pessoa(db: Session, dados: PessoaCreate) -> Pessoa:
         )
 
         db.add(pessoa)
+        db.flush()
+        atualizar_ministerios_pessoa(
+            db,
+            pessoa.seq_pessoa,
+            dados.seq_ministerios
+        )
         db.commit()
         db.refresh(pessoa)
 
@@ -193,10 +237,16 @@ def atualizar_pessoa(
         if dados.st_ativo is not None:
             pessoa.st_ativo = dados.st_ativo
 
+        atualizar_ministerios_pessoa(
+            db,
+            pessoa.seq_pessoa,
+            dados.seq_ministerios
+        )
+
         db.commit()
         db.refresh(pessoa)
 
-        return pessoa
+        return buscar_pessoa_por_id(db, seq_pessoa)
 
     except SQLAlchemyError:
         db.rollback()

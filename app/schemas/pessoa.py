@@ -20,11 +20,12 @@ class PessoaBase(BaseModel):
 
 
 class PessoaCreate(PessoaBase):
-    pass
+    seq_ministerios: list[int] = Field(default_factory=list)
 
 
 class PessoaUpdate(PessoaBase):
     st_ativo: bool | None = None
+    seq_ministerios: list[int] = Field(default_factory=list)
 
 
 class PessoaLiderResponse(BaseModel):

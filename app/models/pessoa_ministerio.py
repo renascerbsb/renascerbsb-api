@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, ForeignKey, Integer
+from datetime import datetime
+from sqlalchemy import DateTime, ForeignKey, Integer, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base, DATABASE_SCHEMA
@@ -20,8 +21,8 @@ class PessoaMinisterio(Base):
         primary_key=True
     )
 
-    st_ativo: Mapped[bool] = mapped_column(
-        Boolean,
+    dh_inclusao: Mapped[datetime] = mapped_column(
+        DateTime,
         nullable=False,
-        default=True
+        server_default=text("CURRENT_TIMESTAMP")
     )
