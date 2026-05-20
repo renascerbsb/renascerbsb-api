@@ -1,0 +1,10 @@
+from enum import StrEnum
+
+
+class ComoConheceuIgreja(StrEnum):
+    CONVIDADO_MEMBRO = "CONVIDADO_MEMBRO"
+    CONVIDADO_EXTERNO = "CONVIDADO_EXTERNO"
+    WHATSAPP = "WHATSAPP"
+    INSTAGRAM = "INSTAGRAM"
+    GOOGLE_MAPS = "GOOGLE_MAPS"
+    OUTROS = "OUTROS"
