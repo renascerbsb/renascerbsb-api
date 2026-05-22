@@ -56,8 +56,8 @@ def buscar_seq_faixa_etaria_por_nascimento(
     return faixa_etaria.seq_faixa_etaria
 
 
-def normalizar_seq_ministerios(seq_ministerios: list[int]) -> list[int]:
-    return list(dict.fromkeys(seq_ministerios))
+def normalizar_array(seq_lista: list[int]) -> list[int]:
+    return list(dict.fromkeys(seq_lista))
 
 
 def atualizar_ministerios_pessoa(
@@ -69,7 +69,7 @@ def atualizar_ministerios_pessoa(
         PessoaMinisterio.seq_pessoa == seq_pessoa
     ).delete(synchronize_session=False)
 
-    for seq_ministerio in normalizar_seq_ministerios(seq_ministerios):
+    for seq_ministerio in normalizar_array(seq_ministerios):
         db.add(
             PessoaMinisterio(
                 seq_pessoa=seq_pessoa,
@@ -107,6 +107,9 @@ def listar_pessoas(
         if filtros.nr_telefone:
             query = query.filter(Pessoa.nr_telefone.ilike(f"%{filtros.nr_telefone}%"))
 
+        if filtros.tp_genero is not None:
+            query = query.filter(Pessoa.tp_genero == filtros.tp_genero.value)
+
         if filtros.dt_nascimento is not None:
             query = query.filter(Pessoa.dt_nascimento == filtros.dt_nascimento)
 
@@ -122,9 +125,6 @@ def listar_pessoas(
         if filtros.seq_faixa_etaria is not None:
             query = query.filter(Pessoa.seq_faixa_etaria == filtros.seq_faixa_etaria)
 
-        if filtros.seq_lider is not None:
-            query = query.filter(Pessoa.seq_lider == filtros.seq_lider)
-
         if filtros.st_ativo is not None:
             query = query.filter(Pessoa.st_ativo.is_(filtros.st_ativo))
 
@@ -134,7 +134,18 @@ def listar_pessoas(
                 .join(PessoaMinisterio)
                 .filter(
                     PessoaMinisterio.seq_ministerio.in_(
-                        normalizar_seq_ministerios(filtros.seq_ministerios)
+                        normalizar_array(filtros.seq_ministerios)
+                    )
+                )
+                .distinct()
+            )
+
+        if filtros.seq_lideres:
+            query = (
+                query
+                .filter(
+                    Pessoa.seq_lider.in_(
+                        normalizar_array(filtros.seq_lideres)
                     )
                 )
                 .distinct()
@@ -179,6 +190,7 @@ def criar_pessoa(db: Session, dados: PessoaCreate) -> Pessoa:
         pessoa = Pessoa(
             ds_nome=dados.ds_nome,
             nr_telefone=dados.nr_telefone,
+            tp_genero=dados.tp_genero.value if dados.tp_genero is not None else None,
             dt_nascimento=dados.dt_nascimento,
             seq_cidade=dados.seq_cidade,
             seq_filial=dados.seq_filial,
@@ -211,10 +223,11 @@ def criar_visitante(db: Session, dados: PessoaVisitanteCreate) -> Pessoa:
         pessoa = Pessoa(
             ds_nome=dados.ds_nome,
             nr_telefone=dados.nr_telefone,
+            tp_genero=dados.tp_genero.value if dados.tp_genero is not None else None,
             dt_nascimento=None,
             seq_cidade=dados.seq_cidade,
             seq_filial=dados.seq_filial,
-            seq_vinculo=3,
+            seq_vinculo=7,
             seq_faixa_etaria=None,
             seq_lider=None,
             st_ativo=True
@@ -224,8 +237,9 @@ def criar_visitante(db: Session, dados: PessoaVisitanteCreate) -> Pessoa:
         db.flush()
 
         pessoa_origem = PessoaOrigem(
-            ds_como_conheceu=dados.ds_como_conheceu.value,
+            ds_como_conheceu=dados.ds_como_conheceu,
             st_frequenta_igreja=dados.st_frequenta_igreja,
+            aceita_contato=dados.aceita_contato,
             ds_nome_convidou=dados.ds_nome_convidou,
             seq_evento_frequentou=dados.seq_evento_frequentou,
             ds_observacao=dados.ds_observacao,
@@ -264,6 +278,7 @@ def atualizar_pessoa(
 
         pessoa.ds_nome = dados.ds_nome
         pessoa.nr_telefone = dados.nr_telefone
+        pessoa.tp_genero = dados.tp_genero.value if dados.tp_genero is not None else None
         pessoa.dt_nascimento = dados.dt_nascimento
         pessoa.seq_cidade = dados.seq_cidade
         pessoa.seq_filial = dados.seq_filial

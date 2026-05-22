@@ -9,12 +9,13 @@ class PessoaOrigem(Base):
     __table_args__ = {"schema": DATABASE_SCHEMA}
 
     seq_pessoa_origem: Mapped[int] = mapped_column(Integer, primary_key=True)
-    ds_como_conheceu: Mapped[str] = mapped_column(String(50), nullable=False)
+    ds_como_conheceu: Mapped[int] = mapped_column(Integer, nullable=False)
     st_frequenta_igreja: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=False
     )
+    aceita_contato: Mapped[bool] = mapped_column(Boolean, nullable=False)
     ds_nome_convidou: Mapped[str | None] = mapped_column(String(200), nullable=True)
     seq_evento_frequentou: Mapped[int | None] = mapped_column(
         Integer,

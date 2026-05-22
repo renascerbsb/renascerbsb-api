@@ -12,6 +12,7 @@ class Pessoa(Base):
     seq_pessoa: Mapped[int] = mapped_column(Integer, primary_key=True)
     ds_nome: Mapped[str] = mapped_column(String(200), nullable=False)
     nr_telefone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    tp_genero: Mapped[str | None] = mapped_column(String(1), nullable=True)
     dt_nascimento: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     seq_cidade: Mapped[int | None] = mapped_column(
@@ -64,3 +65,7 @@ class Pessoa(Base):
     vinculo = relationship("Vinculo")
     faixa_etaria = relationship(FaixaEtaria)
     lider = relationship("Pessoa", remote_side=[seq_pessoa], foreign_keys=[seq_lider])
+
+    @property
+    def seq_ministerios(self) -> list[int]:
+        return [ministerio.seq_ministerio for ministerio in self.ministerios]
