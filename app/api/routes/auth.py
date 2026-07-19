@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.usuario import Usuario
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import TokenResponse
 from app.services.auth_service import (
     CredenciaisInvalidasError,
     TokenInvalidoError,
@@ -49,12 +49,15 @@ def obter_usuario_autenticado(
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(dados: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
     try:
         usuario = autenticar_usuario(
             db,
-            dados.ds_usuario,
-            dados.ds_senha
+            form_data.username,
+            form_data.password,
         )
     except CredenciaisInvalidasError:
         raise HTTPException(
@@ -69,7 +72,7 @@ def login(dados: LoginRequest, db: Session = Depends(get_db)):
         access_token=access_token,
         expires_at=expires_at,
         expires_in=expires_in,
-        usuario=usuario
+        usuario=usuario,
     )
 
 

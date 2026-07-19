@@ -3,11 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class LoginRequest(BaseModel):
-    ds_usuario: str
-    ds_senha: str
-
-
 class UsuarioTokenResponse(BaseModel):
     seq_usuario: int
     ds_usuario: str

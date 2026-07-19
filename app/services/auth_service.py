@@ -114,8 +114,12 @@ def _json_base64url(valor: dict[str, Any]) -> str:
 
 def criar_token_acesso(usuario: Usuario) -> tuple[str, datetime, int]:
     agora = datetime.now(UTC)
-    expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expires_at = agora + expires_delta
+    issued_at = int(agora.timestamp())
+    expires_in = int(
+        timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES).total_seconds()
+    )
+    expires_timestamp = issued_at + expires_in
+    expires_at = datetime.fromtimestamp(expires_timestamp, UTC)
 
     header = {
         "alg": JWT_ALGORITHM,
@@ -124,8 +128,8 @@ def criar_token_acesso(usuario: Usuario) -> tuple[str, datetime, int]:
     payload = {
         "sub": str(usuario.seq_usuario),
         "ds_usuario": usuario.ds_usuario,
-        "iat": int(agora.timestamp()),
-        "exp": int(expires_at.timestamp()),
+        "iat": issued_at,
+        "exp": expires_timestamp,
     }
 
     assinatura_base = f"{_json_base64url(header)}.{_json_base64url(payload)}"
@@ -136,7 +140,7 @@ def criar_token_acesso(usuario: Usuario) -> tuple[str, datetime, int]:
     ).digest()
 
     token = f"{assinatura_base}.{_base64url_encode(assinatura)}"
-    return token, expires_at, int(expires_delta.total_seconds())
+    return token, expires_at, expires_in
 
 
 def validar_token_acesso(token: str) -> dict[str, Any]:

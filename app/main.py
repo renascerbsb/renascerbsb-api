@@ -5,12 +5,16 @@ from app.api.routes import (
     auth,
     cidades,
     dashboard,
+    etapas_trajetoria,
     eventos,
     faixas_etarias,
     filiais,
+    filiais_trajetorias,
     kids,
     ministerios,
     pessoas,
+    trajetorias,
+    trajetorias_etapas,
     vinculos,
 )
 
@@ -74,6 +78,12 @@ app.include_router(
     dependencies=auth_required
 )
 app.include_router(
+    filiais_trajetorias.router,
+    prefix="/filiais-trajetorias",
+    tags=["Trajetorias das Filiais"],
+    dependencies=auth_required
+)
+app.include_router(
     faixas_etarias.router,
     prefix="/faixas-etarias",
     tags=["Faixas Etarias"],
@@ -89,6 +99,24 @@ app.include_router(
     vinculos.router,
     prefix="/vinculos",
     tags=["Vinculos"],
+    dependencies=auth_required
+)
+app.include_router(
+    etapas_trajetoria.router,
+    prefix="/etapas-trajetoria",
+    tags=["Etapas de Trajetoria"],
+    dependencies=auth_required
+)
+app.include_router(
+    trajetorias.router,
+    prefix="/trajetorias",
+    tags=["Trajetorias"],
+    dependencies=auth_required
+)
+app.include_router(
+    trajetorias_etapas.router,
+    prefix="/trajetorias-etapas",
+    tags=["Etapas das Trajetorias"],
     dependencies=auth_required
 )
 
